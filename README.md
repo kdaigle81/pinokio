@@ -1,0 +1,2 @@
+# pinokio
+AI Browser
