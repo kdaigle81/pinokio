@@ -3020,8 +3020,30 @@ const buildBrowserContextMenuTemplate = (webContents, params = {}) => {
   }
   return template
 }
+const handleWindowsZoomInAlias = (event, input, webContents) => {
+  if (process.platform !== 'win32' || !input || input.type !== 'keyDown') {
+    return false
+  }
+  if (!input.control || input.alt || input.meta || input.shift) {
+    return false
+  }
+  if (input.key !== '=' && input.code !== 'Equal') {
+    return false
+  }
+  if (!webContents || webContents.isDestroyed()) {
+    return false
+  }
+  // Chromium zooms in on Ctrl+Plus, but Windows users also expect Ctrl+=.
+  event.preventDefault()
+  webContents.setZoomLevel(webContents.getZoomLevel() + 1)
+  return true
+}
 const attach = (event, webContents) => {
   let wc = webContents
+
+  webContents.on('before-input-event', (event, input) => {
+    handleWindowsZoomInAlias(event, input, webContents)
+  })
 
   if (ENABLE_BROWSER_CONSOLE_LOG && !attachedConsoleListeners.has(webContents)) {
     attachedConsoleListeners.add(webContents)
